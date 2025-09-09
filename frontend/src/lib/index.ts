@@ -4,10 +4,13 @@ import { InterfaceAbi } from "ethers";
 
 export class BlockchainRegistry {
   private provider: JsonRpcProvider | null = null;
+  private contracts: Map<string, Contract> = new Map();
   private contract: Contract | null = null;
   private wallet: Wallet | null = null;
 
   private established: boolean = false;
+  private readonly contractAddress: string =
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
 
   /**
    * Setup the blockchain provider, wallet, and contract instances every this class instance called
@@ -37,11 +40,13 @@ export class BlockchainRegistry {
     // TODO: Add the real contract address and ABI below
     const abi = await this.loadAbi();
 
-    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-    if (!contractAddress)
+    if (!this.contractAddress)
       throw new Error("Contract address not found in environment variables");
 
-    this.contract = new Contract(contractAddress, abi, this.wallet);
+    this.contracts.set(
+      "owner",
+      new Contract(this.contractAddress, abi, this.wallet)
+    );
   }
 
   async loadAbi(): Promise<InterfaceAbi> {
@@ -52,13 +57,21 @@ export class BlockchainRegistry {
           `Failed to load ABI: ${response.status} ${response.statusText}`
         );
       return await response.json();
-    }
-    // For Node.js (test environment)
-    else {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+    } else {
       const abiModule = await import("../../public/Medisa.abi.json");
       return abiModule.default || abiModule;
     }
+  }
+
+  async loadContract(role: "hospital" | "patient", address: AddressType) {
+    if (!this.established) throw new Error("Provider not established");
+
+    const signer = await this.provider!.getSigner(address);
+    const abi = await this.loadAbi();
+    this.contracts.set(
+      `${role}:${address}`,
+      new Contract(this.contractAddress, abi, signer)
+    );
   }
 
   // =================== Core Function ===================
@@ -68,85 +81,89 @@ export class BlockchainRegistry {
   };
   // Group of Hospital Functions
   hospital = {
-    recordCreation: this.createRecord.bind(this),
-    requestAccess: this.requestAccess.bind(this),
-    viewRecords: this.viewRecords.bind(this),
+    recordCreation: this.issueRecord.bind(this),
+    requestAccess: this.requestConsent.bind(this),
+    // viewRecords: this.viewRecords.bind(this),
   };
   // Group of Patient Functions
   patient = {
-    getAccessRequests: this.getAccessRequests.bind(this),
+    // getAccessRequests: this.getConsentRequests.bind(this),
     response: {
-      approve: this.approveAccess.bind(this),
-      reject: this.denyAccess.bind(this),
+      approve: this.approveConsent.bind(this),
+      reject: this.denyConsent.bind(this),
     },
   };
-
-  private ensureContract(ctx: Contract | null) {
-    if (!ctx) throw new Error("Contract not initialized");
-    return ctx;
-  }
 
   /**
    * Registers a hospital (owner only)
    */
   protected async register(_hospital: AddressType, _hospitalName: string) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.registerHospital(_hospital, _hospitalName);
+    // load the contract
+    const ownerContract = this.contracts.get(`owner:${this.wallet?.address}`);
+    if (!ownerContract) throw new Error("Hospital contract not found");
+    const signer = await this.provider!.getSigner(_hospital);
+    return await ownerContract.registerHospital(signer, _hospitalName);
   }
 
-  /**
-   * Hospital views patient record (if approved)
-   */
-  protected async viewRecords(_patient: AddressType) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.viewRecords(_patient);
-  }
-
-  /**
-   * Patient creates their medical record
-   */
-  protected async createRecord(
+  protected async issueRecord(
+    _hospital: AddressType,
     _data: string,
+    _patient: AddressType
+  ) {
+    await this.loadContract("hospital", _hospital);
+
+    // load the contract
+    const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
+    if (!hospitalContract) throw new Error("Hospital contract not found");
+
+    return await hospitalContract.issueRecord(_data, _patient);
+  }
+
+  protected async requestConsent(
+    _hospital: AddressType,
+    _patient: AddressType,
+    _reason: string
+  ) {
+    await this.loadContract("hospital", _hospital);
+    // load the contract
+    const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
+    if (!hospitalContract) throw new Error("Hospital contract not found");
+
+    return await hospitalContract.requestConsent(_patient, _reason);
+  }
+
+  protected async approveConsent(
     _patient: AddressType,
     _hospital: AddressType
   ) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.createRecord(_data, _patient, _hospital);
+    await this.loadContract("patient", _patient);
+    // load the contract
+    const patientContract = this.contracts.get(`patient:${_patient}`);
+    if (!patientContract) throw new Error("Patient contract not found");
+    return await patientContract.approveConsent(_hospital);
   }
 
-  /**
-   * Hospital requests access to patient record
-   */
-  protected async requestAccess(
-    _patient: AddressType,
-    _hospital: AddressType,
-    _reason: string
-  ) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.requestAccess(_patient, _hospital, _reason);
+  protected async denyConsent(_patient: AddressType, _hospital: AddressType) {
+    await this.loadContract("patient", _patient);
+    // load the contract
+    const patientContract = this.contracts.get(`patient:${_patient}`);
+    if (!patientContract) throw new Error("Patient contract not found");
+    return await patientContract.denyConsent(_hospital);
   }
 
-  protected async getAccessRequests(
-    _hospital: AddressType,
-    _patient: AddressType
-  ) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.getAccessRequest(_hospital, _patient);
-  }
+  // /**
+  //  * Hospital views patient record (if approved)
+  //  */
+  // protected async viewRecords(_patient: AddressType) {
+  //   const contract = this.ensureContract(this.contract);
+  //   return await contract.viewRecords(_patient);
+  // }
 
-  /**
-   * Patient approves hospital access
-   */
-  protected async approveAccess(_hospital: AddressType) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.approveAccess(_hospital);
-  }
-
-  /**
-   * Patient denies hospital access
-   */
-  protected async denyAccess(_hospital: AddressType) {
-    const contract = this.ensureContract(this.contract);
-    return await contract.denyAccess(_hospital);
-  }
+  // protected async getConsentRequests(
+  //   _hospital: AddressType,
+  //   _patient: AddressType
+  // ) {
+  //   const contract = this.ensureContract(this.contract);
+  //   return await contract.getConsentRequest(_hospital, _patient);
+  // }
 }

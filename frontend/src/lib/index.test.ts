@@ -33,73 +33,56 @@ describe("BlockchainRegistry", () => {
     }
   });
 
-  it("should create a record", async () => {
+  it("should issue a record", async () => {
     try {
       const result = await registry.hospital.recordCreation(
+        testHospital,
         testData,
+        testPatient
+      );
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("issueRecord error:", err);
+      throw err;
+    }
+  });
+
+  it("should request consent", async () => {
+    try {
+      const result = await registry.hospital.requestAccess(
+        testHospital,
+        testPatient,
+        testReason
+      );
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("requestConsent error:", err);
+      throw err;
+    }
+  });
+
+  it("should approve consent", async () => {
+    try {
+      const result = await registry.patient.response.approve(
         testPatient,
         testHospital
       );
       expect(result).toBeDefined();
     } catch (err) {
-      console.error("createRecord error:", err);
+      console.error("approveConsent error:", err);
       throw err;
     }
   });
 
-  it("should request access", async () => {
+  it("should deny consent", async () => {
     try {
-      const result = await registry.hospital.requestAccess(
+      const result = await registry.patient.response.reject(
         testPatient,
-        testHospital,
-        testReason
+        testHospital
       );
       expect(result).toBeDefined();
     } catch (err) {
-      console.error("requestAccess error:", err);
-      throw err;
-    }
-  });
-
-  it("should approve access", async () => {
-    try {
-      const result = await registry.patient.response.approve(testHospital);
-      expect(result).toBeDefined();
-    } catch (err) {
-      console.error("approveAccess error:", err);
-      throw err;
-    }
-  });
-
-  it("should deny access", async () => {
-    try {
-      const result = await registry.patient.response.reject(testHospital);
-      expect(result).toBeDefined();
-    } catch (err) {
-      console.error("denyAccess error:", err);
-      throw err;
-    }
-  });
-
-  it("should view records", async () => {
-    try {
-      const result = await registry.hospital.viewRecords(testPatient);
-      expect(result).toBeDefined();
-    } catch (err) {
-      console.error("viewRecords error:", err);
-      throw err;
-    }
-  });
-
-  it("should get access request info", async () => {
-    try {
-      const result = await registry.patient.getAccessRequests(
-        testHospital,
-        testPatient
-      );
-      expect(result).toBeDefined();
-    } catch (err) {
-      console.error("getAccessRequests error:", err);
+      console.error("denyConsent error:", err);
       throw err;
     }
   });
