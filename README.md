@@ -56,8 +56,6 @@ NEXT_PUBLIC_CONTRACT_ADDRESS="......"
 
 ## 🔄 Flow Explanation
 
-![alt text](diagram-export-9-9-2025-2_10_54-PM.png)
-
 ### 1. Admin Registers Hospital
 
 1. The Admin entity registers a hospital in the Medisa system.
