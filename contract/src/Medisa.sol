@@ -10,7 +10,7 @@ contract Medisa {
         uint256 timestamp;
     }
 
-    struct AccessRequest {
+    struct ConsentRequest {
         address hospital;
         address patient;
         string reason;
@@ -21,21 +21,21 @@ contract Medisa {
 
     // Storage
     mapping(address => MedicalRecord[]) private patientRecords;
-    mapping(address => mapping(address => AccessRequest))
-        private accessRequests;
+    mapping(address => mapping(address => ConsentRequest))
+        private consentRequests;
     mapping(address => string) public hospitals;
-    mapping(address => address[]) private patientAccessRequests;
+    mapping(address => address[]) private patientConsentRequests;
 
     address public owner;
 
     event RecordCreated(address indexed patient);
-    event AccessRequested(
+    event ConsentRequested(
         address indexed hospital,
         address indexed patient,
         string reason
     );
-    event AccessApproved(address indexed hospital, address indexed patient);
-    event AccessDenied(address indexed hospital, address indexed patient);
+    event ConsentApproved(address indexed hospital, address indexed patient);
+    event ConsentDenied(address indexed hospital, address indexed patient);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner");
@@ -54,7 +54,7 @@ contract Medisa {
         require(
             msg.sender == _patient ||
                 (bytes(hospitals[msg.sender]).length > 0 &&
-                    accessRequests[msg.sender][_patient].approved),
+                    consentRequests[msg.sender][_patient].approved),
             "Not authorized"
         );
         _;
@@ -73,7 +73,7 @@ contract Medisa {
     }
 
     // Patient creates their medical record
-    function createRecord(
+    function issueRecord(
         string memory _data,
         address _patient
     ) external onlyHospital {
@@ -91,17 +91,17 @@ contract Medisa {
     }
 
     // Hospital requests access to patient record
-    function requestAccess(
+    function requestConsent(
         address _patient,
         string memory _reason
     ) external onlyHospital {
         require(patientRecords[_patient].length > 0, "Patient has no records");
         require(
-            !accessRequests[msg.sender][_patient].exists,
+            !consentRequests[msg.sender][_patient].exists,
             "Request already exists"
         );
 
-        accessRequests[msg.sender][_patient] = AccessRequest({
+        consentRequests[msg.sender][_patient] = ConsentRequest({
             hospital: msg.sender,
             patient: _patient,
             reason: _reason,
@@ -110,48 +110,48 @@ contract Medisa {
             timestamp: block.timestamp
         });
 
-        patientAccessRequests[_patient].push(msg.sender);
+        patientConsentRequests[_patient].push(msg.sender);
 
-        emit AccessRequested(msg.sender, _patient, _reason);
+        emit ConsentRequested(msg.sender, _patient, _reason);
     }
 
     // Patient approves hospital access
-    function approveAccess(address _hospital) external {
+    function approveConsent(address _hospital) external {
         require(
-            accessRequests[_hospital][msg.sender].exists,
+            consentRequests[_hospital][msg.sender].exists,
             "No request found"
         );
         require(
-            !accessRequests[_hospital][msg.sender].approved,
+            !consentRequests[_hospital][msg.sender].approved,
             "Already approved"
         );
 
-        accessRequests[_hospital][msg.sender].approved = true;
+        consentRequests[_hospital][msg.sender].approved = true;
 
-        emit AccessApproved(_hospital, msg.sender);
+        emit ConsentApproved(_hospital, msg.sender);
     }
 
     // Patient denies hospital access
-    function denyAccess(address _hospital) external {
+    function denyConsent(address _hospital) external {
         require(
-            accessRequests[_hospital][msg.sender].exists,
+            consentRequests[_hospital][msg.sender].exists,
             "No request found"
         );
 
-        accessRequests[_hospital][msg.sender].approved = false;
+        consentRequests[_hospital][msg.sender].approved = false;
 
-        emit AccessDenied(_hospital, msg.sender);
+        emit ConsentDenied(_hospital, msg.sender);
     }
 
-    function revokeAccess(address _hospital) external {
+    function revokeConsent(address _hospital) external {
         require(
-            accessRequests[_hospital][msg.sender].exists,
+            consentRequests[_hospital][msg.sender].exists,
             "No request found"
         );
 
-        accessRequests[_hospital][msg.sender].approved = false;
+        consentRequests[_hospital][msg.sender].approved = false;
 
-        emit AccessDenied(_hospital, msg.sender);
+        emit ConsentDenied(_hospital, msg.sender);
     }
 
     // Hospital views patient record (if approved)
@@ -170,7 +170,7 @@ contract Medisa {
         return patientRecords[_patient].length > 0;
     }
 
-    function getAccessRequest(
+    function getConsentRequest(
         address _hospital,
         address _patient
     ) external view returns (string memory reason, bool approved, bool exists) {
@@ -178,7 +178,7 @@ contract Medisa {
             msg.sender == _patient || msg.sender == _hospital,
             "Not authorized to view request"
         );
-        AccessRequest memory request = accessRequests[_hospital][_patient];
+        ConsentRequest memory request = consentRequests[_hospital][_patient];
         return (request.reason, request.approved, request.exists);
     }
 
@@ -190,17 +190,17 @@ contract Medisa {
         return patientRecords[msg.sender];
     }
 
-    function getPatientAccessRequests()
+    function getPatientConsentRequests()
         external
         view
         returns (address[] memory)
     {
-        return patientAccessRequests[msg.sender];
+        return patientConsentRequests[msg.sender];
     }
 
-    function getMyAccessRequest(
+    function getMyConsentRequest(
         address _patient
-    ) external view onlyHospital returns (AccessRequest memory) {
-        return accessRequests[msg.sender][_patient];
+    ) external view onlyHospital returns (ConsentRequest memory) {
+        return consentRequests[msg.sender][_patient];
     }
 }
