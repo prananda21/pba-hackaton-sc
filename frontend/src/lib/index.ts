@@ -10,14 +10,14 @@ export class BlockchainRegistry {
 
   private established: boolean = false;
   private readonly contractAddress: string =
-    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
+    "0x9f487E552efCbF6Ff7CDDa05F9042Fd90812a6Be";
 
   /**
    * Setup the blockchain provider, wallet, and contract instances every this class instance called
    */
   async setupProvider() {
     // Setup provider connection first
-    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+    const rpcUrl = "https://testnet-passet-hub-eth-rpc.polkadot.io";
     if (!rpcUrl) throw new Error("RPC URL not found in environment variables");
     this.provider = new JsonRpcProvider(rpcUrl);
 
@@ -31,7 +31,8 @@ export class BlockchainRegistry {
     }
 
     // Setup wallet instance
-    const pv = process.env.NEXT_PUBLIC_PRIVATE_KEY;
+    const pv =
+      "227c8fe2023a5087e72b65dde2b2fd07af71ee12da5e9e4385952759c376bc81";
     if (!pv) {
       throw new Error("Private key not found in environment variables");
     }
@@ -66,11 +67,11 @@ export class BlockchainRegistry {
   async loadContract(role: "hospital" | "patient", address: AddressType) {
     if (!this.established) throw new Error("Provider not established");
 
-    const signer = await this.provider!.getSigner(address);
+    // const signer = await this.provider!.getSigner(address);
     const abi = await this.loadAbi();
     this.contracts.set(
       `${role}:${address}`,
-      new Contract(this.contractAddress, abi, signer)
+      new Contract(this.contractAddress, abi, this.wallet)
     );
   }
 
@@ -98,11 +99,15 @@ export class BlockchainRegistry {
    * Registers a hospital (owner only)
    */
   protected async register(_hospital: AddressType, _hospitalName: string) {
-    // load the contract
-    const ownerContract = this.contracts.get(`owner:${this.wallet?.address}`);
-    if (!ownerContract) throw new Error("Hospital contract not found");
-    const signer = await this.provider!.getSigner(_hospital);
-    return await ownerContract.registerHospital(signer, _hospitalName);
+    try {
+      const ownerContract = this.contracts.get(`owner`);
+
+      if (!ownerContract) throw new Error("Hospital contract not found");
+      return await ownerContract.registerHospital(_hospital, _hospitalName);
+    } catch (e) {
+      console.error("error register: ", e);
+      throw e;
+    }
   }
 
   protected async issueRecord(
@@ -110,13 +115,18 @@ export class BlockchainRegistry {
     _data: string,
     _patient: AddressType
   ) {
-    await this.loadContract("hospital", _hospital);
+    try {
+      await this.loadContract("hospital", _hospital);
 
-    // load the contract
-    const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
-    if (!hospitalContract) throw new Error("Hospital contract not found");
+      // load the contract
+      const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
+      if (!hospitalContract) throw new Error("Hospital contract not found");
 
-    return await hospitalContract.issueRecord(_data, _patient);
+      return await hospitalContract.issueRecord(_data, _patient);
+    } catch (e) {
+      console.error("error issue record: ", e);
+      throw e;
+    }
   }
 
   protected async requestConsent(
@@ -124,31 +134,46 @@ export class BlockchainRegistry {
     _patient: AddressType,
     _reason: string
   ) {
-    await this.loadContract("hospital", _hospital);
-    // load the contract
-    const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
-    if (!hospitalContract) throw new Error("Hospital contract not found");
+    try {
+      await this.loadContract("hospital", _hospital);
+      // load the contract
+      const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
+      if (!hospitalContract) throw new Error("Hospital contract not found");
 
-    return await hospitalContract.requestConsent(_patient, _reason);
+      return await hospitalContract.requestConsent(_patient, _reason);
+    } catch (e) {
+      console.error("error request consent: ", e);
+      throw e;
+    }
   }
 
   protected async approveConsent(
     _patient: AddressType,
     _hospital: AddressType
   ) {
-    await this.loadContract("patient", _patient);
-    // load the contract
-    const patientContract = this.contracts.get(`patient:${_patient}`);
-    if (!patientContract) throw new Error("Patient contract not found");
-    return await patientContract.approveConsent(_hospital);
+    try {
+      await this.loadContract("patient", _patient);
+      // load the contract
+      const patientContract = this.contracts.get(`patient:${_patient}`);
+      if (!patientContract) throw new Error("Patient contract not found");
+      return await patientContract.approveConsent(_hospital);
+    } catch (e) {
+      console.error("error approve consent: ", e);
+      throw e;
+    }
   }
 
   protected async denyConsent(_patient: AddressType, _hospital: AddressType) {
-    await this.loadContract("patient", _patient);
-    // load the contract
-    const patientContract = this.contracts.get(`patient:${_patient}`);
-    if (!patientContract) throw new Error("Patient contract not found");
-    return await patientContract.denyConsent(_hospital);
+    try {
+      await this.loadContract("patient", _patient);
+      // load the contract
+      const patientContract = this.contracts.get(`patient:${_patient}`);
+      if (!patientContract) throw new Error("Patient contract not found");
+      return await patientContract.denyConsent(_hospital);
+    } catch (e) {
+      console.error("error deny consent: ", e);
+      throw e;
+    }
   }
 
   // /**
