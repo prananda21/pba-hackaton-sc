@@ -7,7 +7,7 @@ export class BlockchainRegistry {
   private contract: Contract | null = null;
   private wallet: Wallet | null = null;
 
-  private enstablished: boolean = false;
+  private established: boolean = false;
 
   /**
    * Setup the blockchain provider, wallet, and contract instances every this class instance called
@@ -18,10 +18,10 @@ export class BlockchainRegistry {
 
     try {
       await this.provider.getNetwork();
-      this.enstablished = true;
+      this.established = true;
     } catch (e) {
       console.error(`Error setting up provider: ${e}`);
-      this.enstablished = false;
+      this.established = false;
       throw new Error(`Error setting up provider: ${e}`);
     }
 
@@ -41,7 +41,10 @@ export class BlockchainRegistry {
 
   async loadAbi(): Promise<InterfaceAbi> {
     const response = await fetch("/Medisa.abi.json");
-    if (!response.ok) throw new Error(`Failed to load ABI: ${response.status} ${response.statusText}`);
+    if (!response.ok)
+      throw new Error(
+        `Failed to load ABI: ${response.status} ${response.statusText}`
+      );
     return await response.json();
   }
 
