@@ -115,11 +115,12 @@ export class BlockchainRegistry {
     return await contract.requestAccess(_patient, _hospital, _reason);
   }
 
-  protected getAccessRequests(
-    hospital_address: AddressType,
-    patient_address: AddressType
+  protected async getAccessRequests(
+    _hospital: AddressType,
+    _patient: AddressType
   ) {
-    // TODO: Implementation here
+    const contract = this.ensureContract(this.contract);
+    return await contract.getAccessRequest(_hospital, _patient);
   }
 
   /**
