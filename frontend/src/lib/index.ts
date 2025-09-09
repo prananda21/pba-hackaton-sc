@@ -41,7 +41,7 @@ export class BlockchainRegistry {
 
   async loadAbi(): Promise<InterfaceAbi> {
     const response = await fetch("/Medisa.abi.json");
-    if (!response.ok) throw new Error("Failed to load ABI");
+    if (!response.ok) throw new Error(`Failed to load ABI: ${response.status} ${response.statusText}`);
     return await response.json();
   }
 
