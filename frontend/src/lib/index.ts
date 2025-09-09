@@ -37,7 +37,6 @@ export class BlockchainRegistry {
     // TODO: Add the real contract address and ABI below
     const abi = await this.loadAbi();
 
-    // const contractAddress = "0x0000000000000000000000000000000000000000"; //! NEED TO CHANGE ASAP
     const contractAddress = process.env.CONTRACT_ADDRESS;
     if (!contractAddress)
       throw new Error("Contract address not found in environment variables");
