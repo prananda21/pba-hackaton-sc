@@ -1,7 +1,6 @@
-import { Interface } from "ethers/abi";
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
-import {} from "ethers";
 import { AddressType } from "./utils/type";
+import { InterfaceAbi } from "ethers";
 
 export class BlockchainRegistry {
   private provider: JsonRpcProvider | null = null;
@@ -34,16 +33,25 @@ export class BlockchainRegistry {
     this.wallet = new Wallet(pv, this.provider);
 
     // TODO: Add the real contract address and ABI below
-    this.contract = new Contract("", 1 as unknown as Interface, this.wallet);
+    const abi = await this.loadAbi();
+
+    const contractAddress = "0x0000000000000000000000000000000000000000"; //! NEED TO CHANGE ASAP
+    this.contract = new Contract(contractAddress, abi, this.wallet);
+  }
+
+  async loadAbi(): Promise<InterfaceAbi> {
+    const response = await fetch("/Medisa.abi.json");
+    if (!response.ok) throw new Error(`Failed to load ABI: ${response.status} ${response.statusText}`);
+    return await response.json();
   }
 
   // =================== Core Function ===================
   // Group of Hospital Functions
   hospital = {
     register: this.register.bind(this),
-    recordCreation: this.recordCreation.bind(this),
+    recordCreation: this.createRecord.bind(this),
     requestAccess: this.requestAccess.bind(this),
-    viewRecord: this.viewRecord.bind(this),
+    viewRecords: this.viewRecords.bind(this),
   };
   patient = {
     response: {
@@ -52,41 +60,84 @@ export class BlockchainRegistry {
     },
   };
 
-  protected register(address: AddressType, name: string) {
-    // TODO: Implementation here
+  private ensureContract(ctx: Contract | null) {
+    if (!ctx) throw new Error("Contract not initialized");
+    return ctx;
   }
 
-  protected recordCreation(
-    data: string,
-    patient_address: AddressType,
-    hospital_address: AddressType
+  /**
+   * Registers a hospital (owner only)
+   */
+  protected async register(_hospital: AddressType, _hospitalName: string) {
+    const contract = this.ensureContract(this.contract);
+    return await contract.registerHospital(_hospital, _hospitalName);
+  }
+
+  /**
+   * Hospital views patient record (if approved)
+   */
+  protected async viewRecords(_patient: AddressType) {
+    const contract = this.ensureContract(this.contract);
+    return await contract.viewRecords(_patient);
+  }
+
+  /**
+   * Helper: get access request info
+   */
+  protected async getAccessRequest(
+    _hospital: AddressType,
+    _patient: AddressType
+  ): Promise<{ reason: string; approved: boolean; exists: boolean }> {
+    const contract = this.ensureContract(this.contract);
+
+    return await contract.getAccessRequest(_hospital, _patient);
+  }
+
+  /**
+   * Patient creates their medical record
+   */
+  protected async createRecord(
+    _data: string,
+    _patient: AddressType,
+    _hospital: AddressType
   ) {
-    // TODO: Implementation here
+    const contract = this.ensureContract(this.contract);
+    return await contract.createRecord(_data, _patient, _hospital);
   }
 
-  protected requestAccess(
-    patient_address: AddressType,
-    hospital_address: AddressType,
-    reason: string
+  /**
+   * Hospital requests access to patient record
+   */
+  protected async requestAccess(
+    _patient: AddressType,
+    _hospital: AddressType,
+    _reason: string
   ) {
-    // TODO: Implementation here
+    const contract = this.ensureContract(this.contract);
+    return await contract.requestAccess(_patient, _hospital, _reason);
   }
 
-  protected getAccessRequests(
-    hospital_address: AddressType,
-    patient_address: AddressType
+  protected async getAccessRequests(
+    _hospital: AddressType,
+    _patient: AddressType
   ) {
-    // TODO: Implementation here
+    const contract = this.ensureContract(this.contract);
+    return await contract.getAccessRequest(_hospital, _patient);
   }
 
-  protected approveAccess(hospital_address: AddressType) {
-    // TODO: Implementation here
-  }
-  protected denyAccess(hospital_address: AddressType) {
-    // TODO: Implementation here
+  /**
+   * Patient approves hospital access
+   */
+  protected async approveAccess(_hospital: AddressType) {
+    const contract = this.ensureContract(this.contract);
+    return await contract.approveAccess(_hospital);
   }
 
-  protected viewRecord(patient_address: AddressType) {
-    // TODO: Implementation here
+  /**
+   * Patient denies hospital access
+   */
+  protected async denyAccess(_hospital: AddressType) {
+    const contract = this.ensureContract(this.contract);
+    return await contract.denyAccess(_hospital);
   }
 }
