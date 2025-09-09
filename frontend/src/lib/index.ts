@@ -1,9 +1,6 @@
-import { Interface } from "ethers/abi";
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
-import {} from "ethers";
 import { AddressType } from "./utils/type";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { InterfaceAbi } from "ethers";
 
 export class BlockchainRegistry {
   private provider: JsonRpcProvider | null = null;
@@ -36,11 +33,16 @@ export class BlockchainRegistry {
     this.wallet = new Wallet(pv, this.provider);
 
     // TODO: Add the real contract address and ABI below
-    const abiPath = join(__dirname, "../../../contract/Medisa.abi.json");
-    const abi = JSON.parse(readFileSync(abiPath, "utf-8"));
+    const abi = await this.loadAbi();
 
     const contractAddress = "0x0000000000000000000000000000000000000000"; //! NEED TO CHANGE ASAP
     this.contract = new Contract(contractAddress, abi, this.wallet);
+  }
+
+  async loadAbi(): Promise<InterfaceAbi> {
+    const response = await fetch("/Medisa.abi.json");
+    if (!response.ok) throw new Error("Failed to load ABI");
+    return await response.json();
   }
 
   // =================== Core Function ===================
