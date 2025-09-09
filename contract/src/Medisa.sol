@@ -20,9 +20,11 @@ contract Medisa {
     }
 
     // Storage
-    mapping(address => MedicalRecord[]) public patientRecords;
-    mapping(address => mapping(address => AccessRequest)) public accessRequests;
+    mapping(address => MedicalRecord[]) private patientRecords;
+    mapping(address => mapping(address => AccessRequest))
+        private accessRequests;
     mapping(address => string) public hospitals;
+    mapping(address => address[]) private patientAccessRequests;
 
     address public owner;
 
@@ -40,8 +42,21 @@ contract Medisa {
         _;
     }
 
-    modifier onlyHospital(address _addr) {
-        require(bytes(hospitals[_addr]).length > 0, "Not registered hospital");
+    modifier onlyHospital() {
+        require(
+            bytes(hospitals[msg.sender]).length > 0,
+            "Not registered hospital"
+        );
+        _;
+    }
+
+    modifier onlyPatientOrApprovedHospital(address _patient) {
+        require(
+            msg.sender == _patient ||
+                (bytes(hospitals[msg.sender]).length > 0 &&
+                    accessRequests[msg.sender][_patient].approved),
+            "Not authorized"
+        );
         _;
     }
 
@@ -60,9 +75,8 @@ contract Medisa {
     // Patient creates their medical record
     function createRecord(
         string memory _data,
-        address _patient,
-        address _hospital
-    ) external onlyHospital(_hospital) {
+        address _patient
+    ) external onlyHospital {
         patientRecords[_patient].push(
             MedicalRecord({
                 patient: _patient,
@@ -73,16 +87,19 @@ contract Medisa {
             })
         );
 
-        emit RecordCreated(msg.sender);
+        emit RecordCreated(_patient);
     }
 
     // Hospital requests access to patient record
     function requestAccess(
         address _patient,
-        address _hospital,
         string memory _reason
-    ) external onlyHospital(_hospital) {
+    ) external onlyHospital {
         require(patientRecords[_patient].length > 0, "Patient has no records");
+        require(
+            !accessRequests[msg.sender][_patient].exists,
+            "Request already exists"
+        );
 
         accessRequests[msg.sender][_patient] = AccessRequest({
             hospital: msg.sender,
@@ -93,6 +110,8 @@ contract Medisa {
             timestamp: block.timestamp
         });
 
+        patientAccessRequests[_patient].push(msg.sender);
+
         emit AccessRequested(msg.sender, _patient, _reason);
     }
 
@@ -102,6 +121,10 @@ contract Medisa {
             accessRequests[_hospital][msg.sender].exists,
             "No request found"
         );
+        require(
+            !accessRequests[_hospital][msg.sender].approved,
+            "Already approved"
+        );
 
         accessRequests[_hospital][msg.sender].approved = true;
 
@@ -110,6 +133,22 @@ contract Medisa {
 
     // Patient denies hospital access
     function denyAccess(address _hospital) external {
+        require(
+            accessRequests[_hospital][msg.sender].exists,
+            "No request found"
+        );
+
+        accessRequests[_hospital][msg.sender].approved = false;
+
+        emit AccessDenied(_hospital, msg.sender);
+    }
+
+    function revokeAccess(address _hospital) external {
+        require(
+            accessRequests[_hospital][msg.sender].exists,
+            "No request found"
+        );
+
         accessRequests[_hospital][msg.sender].approved = false;
 
         emit AccessDenied(_hospital, msg.sender);
@@ -118,15 +157,15 @@ contract Medisa {
     // Hospital views patient record (if approved)
     function viewRecords(
         address _patient
-    ) external view onlyHospital(msg.sender) returns (MedicalRecord[] memory) {
-        require(
-            accessRequests[msg.sender][_patient].approved,
-            "Access not approved"
-        );
+    )
+        external
+        view
+        onlyPatientOrApprovedHospital(_patient)
+        returns (MedicalRecord[] memory)
+    {
         return patientRecords[_patient];
     }
 
-    // Helper functions
     function hasRecord(address _patient) external view returns (bool) {
         return patientRecords[_patient].length > 0;
     }
@@ -135,7 +174,33 @@ contract Medisa {
         address _hospital,
         address _patient
     ) external view returns (string memory reason, bool approved, bool exists) {
+        require(
+            msg.sender == _patient || msg.sender == _hospital,
+            "Not authorized to view request"
+        );
         AccessRequest memory request = accessRequests[_hospital][_patient];
         return (request.reason, request.approved, request.exists);
+    }
+
+    function getPatientRecords()
+        external
+        view
+        returns (MedicalRecord[] memory)
+    {
+        return patientRecords[msg.sender];
+    }
+
+    function getPatientAccessRequests()
+        external
+        view
+        returns (address[] memory)
+    {
+        return patientAccessRequests[msg.sender];
+    }
+
+    function getMyAccessRequest(
+        address _patient
+    ) external view onlyHospital returns (AccessRequest memory) {
+        return accessRequests[msg.sender][_patient];
     }
 }
