@@ -75,8 +75,8 @@ export class BlockchainRegistry {
    * Hospital views patient record (if approved)
    */
   protected async viewRecords(_patient: AddressType) {
-    if (!this.contract) throw new Error("Contract not initialized");
-    return await this.contract.viewRecords(_patient);
+    const contract = this.ensureContract(this.contract);
+    return await contract.viewRecords(_patient);
   }
 
   /**
@@ -86,8 +86,9 @@ export class BlockchainRegistry {
     _hospital: AddressType,
     _patient: AddressType
   ): Promise<{ reason: string; approved: boolean; exists: boolean }> {
-    if (!this.contract) throw new Error("Contract not initialized");
-    return await this.contract.getAccessRequest(_hospital, _patient);
+    const contract = this.ensureContract(this.contract);
+
+    return await contract.getAccessRequest(_hospital, _patient);
   }
 
   /**
@@ -98,8 +99,8 @@ export class BlockchainRegistry {
     _patient: AddressType,
     _hospital: AddressType
   ) {
-    if (!this.contract) throw new Error("Contract not initialized");
-    return await this.contract.createRecord(_data, _patient, _hospital);
+    const contract = this.ensureContract(this.contract);
+    return await contract.createRecord(_data, _patient, _hospital);
   }
 
   /**
@@ -110,8 +111,8 @@ export class BlockchainRegistry {
     _hospital: AddressType,
     _reason: string
   ) {
-    if (!this.contract) throw new Error("Contract not initialized");
-    return await this.contract.requestAccess(_patient, _hospital, _reason);
+    const contract = this.ensureContract(this.contract);
+    return await contract.requestAccess(_patient, _hospital, _reason);
   }
 
   protected getAccessRequests(
@@ -125,15 +126,15 @@ export class BlockchainRegistry {
    * Patient approves hospital access
    */
   protected async approveAccess(_hospital: AddressType) {
-    if (!this.contract) throw new Error("Contract not initialized");
-    return await this.contract.approveAccess(_hospital);
+    const contract = this.ensureContract(this.contract);
+    return await contract.approveAccess(_hospital);
   }
 
   /**
    * Patient denies hospital access
    */
   protected async denyAccess(_hospital: AddressType) {
-    if (!this.contract) throw new Error("Contract not initialized");
-    return await this.contract.denyAccess(_hospital);
+    const contract = this.ensureContract(this.contract);
+    return await contract.denyAccess(_hospital);
   }
 }
