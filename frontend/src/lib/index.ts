@@ -1,6 +1,7 @@
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
 import { AddressType } from "./utils/type";
 import { InterfaceAbi } from "ethers";
+import "dotenv/config";
 
 export class BlockchainRegistry {
   private provider: JsonRpcProvider | null = null;
@@ -66,6 +67,7 @@ export class BlockchainRegistry {
   };
   // Group of Patient Functions
   patient = {
+    getAccessRequests: this.getAccessRequests.bind(this),
     response: {
       approve: this.approveAccess.bind(this),
       reject: this.denyAccess.bind(this),
@@ -91,18 +93,6 @@ export class BlockchainRegistry {
   protected async viewRecords(_patient: AddressType) {
     const contract = this.ensureContract(this.contract);
     return await contract.viewRecords(_patient);
-  }
-
-  /**
-   * Helper: get access request info
-   */
-  protected async getAccessRequest(
-    _hospital: AddressType,
-    _patient: AddressType
-  ): Promise<{ reason: string; approved: boolean; exists: boolean }> {
-    const contract = this.ensureContract(this.contract);
-
-    return await contract.getAccessRequest(_hospital, _patient);
   }
 
   /**
