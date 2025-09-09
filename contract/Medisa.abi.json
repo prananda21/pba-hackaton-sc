@@ -6,7 +6,7 @@
   },
   {
     "type": "function",
-    "name": "approveAccess",
+    "name": "approveConsent",
     "inputs": [
       {
         "name": "_hospital",
@@ -19,25 +19,7 @@
   },
   {
     "type": "function",
-    "name": "createRecord",
-    "inputs": [
-      {
-        "name": "_data",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "_patient",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "denyAccess",
+    "name": "denyConsent",
     "inputs": [
       {
         "name": "_hospital",
@@ -50,7 +32,7 @@
   },
   {
     "type": "function",
-    "name": "getAccessRequest",
+    "name": "getConsentRequest",
     "inputs": [
       {
         "name": "_hospital",
@@ -84,7 +66,7 @@
   },
   {
     "type": "function",
-    "name": "getMyAccessRequest",
+    "name": "getMyConsentRequest",
     "inputs": [
       {
         "name": "_patient",
@@ -96,7 +78,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct Medisa.AccessRequest",
+        "internalType": "struct Medisa.ConsentRequest",
         "components": [
           {
             "name": "hospital",
@@ -135,7 +117,7 @@
   },
   {
     "type": "function",
-    "name": "getPatientAccessRequests",
+    "name": "getPatientConsentRequests",
     "inputs": [],
     "outputs": [
       {
@@ -226,6 +208,24 @@
   },
   {
     "type": "function",
+    "name": "issueRecord",
+    "inputs": [
+      {
+        "name": "_data",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_patient",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "owner",
     "inputs": [],
     "outputs": [
@@ -257,7 +257,7 @@
   },
   {
     "type": "function",
-    "name": "requestAccess",
+    "name": "requestConsent",
     "inputs": [
       {
         "name": "_patient",
@@ -275,7 +275,7 @@
   },
   {
     "type": "function",
-    "name": "revokeAccess",
+    "name": "revokeConsent",
     "inputs": [
       {
         "name": "_hospital",
@@ -334,7 +334,7 @@
   },
   {
     "type": "event",
-    "name": "AccessApproved",
+    "name": "ConsentApproved",
     "inputs": [
       {
         "name": "hospital",
@@ -353,7 +353,7 @@
   },
   {
     "type": "event",
-    "name": "AccessDenied",
+    "name": "ConsentDenied",
     "inputs": [
       {
         "name": "hospital",
@@ -372,7 +372,7 @@
   },
   {
     "type": "event",
-    "name": "AccessRequested",
+    "name": "ConsentRequested",
     "inputs": [
       {
         "name": "hospital",
