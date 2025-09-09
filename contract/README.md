@@ -1,66 +1,92 @@
-## Foundry
+# Medisa Smart Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+The **Medisa** smart contract is a decentralized medical record and consent management system built on Paseo Passethub. It allows patients, hospitals, and an owner (admin) to interact securely with medical data while enforcing consent-based access control.
 
-Foundry consists of:
+---
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Features
 
-## Documentation
+- **Hospital Registration**  
+  - Only the contract owner can register hospitals with their names.  
+  - Registered hospitals can issue medical records and request consent.
 
-https://book.getfoundry.sh/
+- **Medical Records**  
+  - Hospitals can issue medical records for patients.  
+  - Each record contains: patient, hospital, hospital name, data, and timestamp.  
+  - Patients can view their own records.  
+  - Hospitals can view patient records only if consent is approved.
 
-## Usage
+- **Consent Management**  
+  - Hospitals can request consent from patients to view their records.  
+  - Patients can approve, deny, or revoke consent.  
+  - Consent requests include: hospital, patient, reason, approval status, and timestamp.  
 
-### Build
+- **Access Control**  
+  - Only registered hospitals can issue records or request consent.  
+  - Only patients or authorized hospitals can view patient records.  
 
-```shell
-$ forge build
-```
+---
 
-### Test
+## Key Functions
 
-```shell
-$ forge test
-```
+### Hospital Management
 
-### Format
+- `registerHospital(address _hospital, string _hospitalName)`  
+  Register a new hospital (owner only).
 
-```shell
-$ forge fmt
-```
+### Records
 
-### Gas Snapshots
+- `issueRecord(string _data, address _patient)`  
+  Hospital issues a new medical record for a patient.  
 
-```shell
-$ forge snapshot
-```
+- `viewRecords(address _patient)`  
+  View a patient's records (patient themselves or approved hospitals).  
 
-### Anvil
+- `getPatientRecords()`  
+  Patient retrieves their own records.  
 
-```shell
-$ anvil
-```
+### Consent
 
-### Deploy
+- `requestConsent(address _patient, string _reason)`  
+  Hospital requests access to a patient’s records.  
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+- `approveConsent(address _hospital)`  
+  Patient approves hospital’s request.  
 
-### Cast
+- `denyConsent(address _hospital)`  
+  Patient denies hospital’s request.  
 
-```shell
-$ cast <subcommand>
-```
+- `revokeConsent(address _hospital)`  
+  Patient revokes previously granted consent.  
 
-### Help
+- `getConsentRequest(address _hospital, address _patient)`  
+  Get consent request details (hospital or patient only).  
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- `getPatientConsentRequests()`  
+  Patient retrieves list of hospitals that requested consent.  
+
+- `getMyConsentRequest(address _patient)`  
+  Hospital retrieves their own consent request for a specific patient.  
+
+---
+
+## Events
+
+- `RecordCreated(address patient)`  
+- `ConsentRequested(address hospital, address patient, string reason)`  
+- `ConsentApproved(address hospital, address patient)`  
+- `ConsentDenied(address hospital, address patient)`  
+
+---
+
+## Roles
+
+- **Owner** → Registers hospitals.  
+- **Hospitals** → Issue medical records, request access.  
+- **Patients** → Manage records and control hospital access via consent.  
+
+---
+
+## License
+
+This project is licensed under the MIT License.
