@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { BlockchainRegistry } from "./index";
 
-const PRIVATE_KEY = process.env.TEST_PRIVATE_KEY;
-const RPC_URL = process.env.RPC_URL;
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const PRIVATE_KEY = process.env.NEXT_PUBLIC_TEST_PRIVATE_KEY;
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 // Dummy addresses for testing (replace with real ones for integration)
 const testHospital = "0x0000000000000000000000000000000000000001";
@@ -11,7 +11,6 @@ const testPatient = "0x0000000000000000000000000000000000000002";
 const testHospitalName = "Test Hospital";
 const testData = "Test Medical Data";
 const testReason = "Test Reason";
-import "dotenv/config";
 
 let registry: BlockchainRegistry;
 
@@ -22,44 +21,86 @@ beforeAll(async () => {
 
 describe("BlockchainRegistry", () => {
   it("should register a hospital", async () => {
-    await expect(
-      registry.admin.register(testHospital, testHospitalName)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.admin.register(
+        testHospital,
+        testHospitalName
+      );
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("register error:", err);
+      throw err;
+    }
   });
 
   it("should create a record", async () => {
-    await expect(
-      registry.hospital.recordCreation(testData, testPatient, testHospital)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.hospital.recordCreation(
+        testData,
+        testPatient,
+        testHospital
+      );
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("createRecord error:", err);
+      throw err;
+    }
   });
 
   it("should request access", async () => {
-    await expect(
-      registry.hospital.requestAccess(testPatient, testHospital, testReason)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.hospital.requestAccess(
+        testPatient,
+        testHospital,
+        testReason
+      );
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("requestAccess error:", err);
+      throw err;
+    }
   });
 
   it("should approve access", async () => {
-    await expect(
-      registry.patient.response.approve(testHospital)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.patient.response.approve(testHospital);
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("approveAccess error:", err);
+      throw err;
+    }
   });
 
   it("should deny access", async () => {
-    await expect(
-      registry.patient.response.reject(testHospital)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.patient.response.reject(testHospital);
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("denyAccess error:", err);
+      throw err;
+    }
   });
 
   it("should view records", async () => {
-    await expect(
-      registry.hospital.viewRecords(testPatient)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.hospital.viewRecords(testPatient);
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("viewRecords error:", err);
+      throw err;
+    }
   });
 
   it("should get access request info", async () => {
-    await expect(
-      registry.patient.getAccessRequests(testHospital, testPatient)
-    ).resolves.not.toThrow();
+    try {
+      const result = await registry.patient.getAccessRequests(
+        testHospital,
+        testPatient
+      );
+      expect(result).toBeDefined();
+    } catch (err) {
+      console.error("getAccessRequests error:", err);
+      throw err;
+    }
   });
 });

@@ -1,7 +1,6 @@
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
 import { AddressType } from "./utils/type";
 import { InterfaceAbi } from "ethers";
-import "dotenv/config";
 
 export class BlockchainRegistry {
   private provider: JsonRpcProvider | null = null;
@@ -15,7 +14,7 @@ export class BlockchainRegistry {
    */
   async setupProvider() {
     // Setup provider connection first
-    const rpcUrl = process.env.RPC_URL;
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
     if (!rpcUrl) throw new Error("RPC URL not found in environment variables");
     this.provider = new JsonRpcProvider(rpcUrl);
 
@@ -29,7 +28,7 @@ export class BlockchainRegistry {
     }
 
     // Setup wallet instance
-    const pv = process.env.PRIVATE_KEY;
+    const pv = process.env.NEXT_PUBLIC_PRIVATE_KEY;
     if (!pv) {
       throw new Error("Private key not found in environment variables");
     }
@@ -38,7 +37,7 @@ export class BlockchainRegistry {
     // TODO: Add the real contract address and ABI below
     const abi = await this.loadAbi();
 
-    const contractAddress = process.env.CONTRACT_ADDRESS;
+    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
     if (!contractAddress)
       throw new Error("Contract address not found in environment variables");
 
@@ -46,12 +45,20 @@ export class BlockchainRegistry {
   }
 
   async loadAbi(): Promise<InterfaceAbi> {
-    const response = await fetch("/Medisa.abi.json");
-    if (!response.ok)
-      throw new Error(
-        `Failed to load ABI: ${response.status} ${response.statusText}`
-      );
-    return await response.json();
+    if (typeof window !== "undefined") {
+      const response = await fetch("/Medisa.abi.json");
+      if (!response.ok)
+        throw new Error(
+          `Failed to load ABI: ${response.status} ${response.statusText}`
+        );
+      return await response.json();
+    }
+    // For Node.js (test environment)
+    else {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const abiModule = await import("../../public/Medisa.abi.json");
+      return abiModule.default || abiModule;
+    }
   }
 
   // =================== Core Function ===================
