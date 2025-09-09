@@ -10,14 +10,14 @@ export class BlockchainRegistry {
 
   private established: boolean = false;
   private readonly contractAddress: string =
-    "0x9f487E552efCbF6Ff7CDDa05F9042Fd90812a6Be";
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
 
   /**
    * Setup the blockchain provider, wallet, and contract instances every this class instance called
    */
   async setupProvider() {
     // Setup provider connection first
-    const rpcUrl = "https://testnet-passet-hub-eth-rpc.polkadot.io";
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
     if (!rpcUrl) throw new Error("RPC URL not found in environment variables");
     this.provider = new JsonRpcProvider(rpcUrl);
 
@@ -31,8 +31,7 @@ export class BlockchainRegistry {
     }
 
     // Setup wallet instance
-    const pv =
-      "227c8fe2023a5087e72b65dde2b2fd07af71ee12da5e9e4385952759c376bc81";
+    const pv = process.env.NEXT_PUBLIC_PRIVATE_KEY;
     if (!pv) {
       throw new Error("Private key not found in environment variables");
     }
@@ -122,7 +121,9 @@ export class BlockchainRegistry {
       const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
       if (!hospitalContract) throw new Error("Hospital contract not found");
 
-      return await hospitalContract.issueRecord(_data, _patient);
+      const memek = await hospitalContract.issueRecord(_data, _patient);
+      console.log("memek: ", memek);
+      return memek;
     } catch (e) {
       console.error("error issue record: ", e);
       throw e;
@@ -138,6 +139,7 @@ export class BlockchainRegistry {
       await this.loadContract("hospital", _hospital);
       // load the contract
       const hospitalContract = this.contracts.get(`hospital:${_hospital}`);
+      console.log("hopital contract: ", hospitalContract);
       if (!hospitalContract) throw new Error("Hospital contract not found");
 
       return await hospitalContract.requestConsent(_patient, _reason);

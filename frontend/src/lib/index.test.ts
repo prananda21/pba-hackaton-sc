@@ -1,13 +1,22 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { BlockchainRegistry } from "./index";
+import { AddressType } from "./utils/type";
+
+function randomEvmAddress() {
+  const bytes = Array.from({ length: 20 }, () =>
+    Math.floor(Math.random() * 256)
+  );
+  return ("0x" +
+    bytes.map((b) => b.toString(16).padStart(2, "0")).join("")) as AddressType;
+}
 
 const PRIVATE_KEY = process.env.NEXT_PUBLIC_TEST_PRIVATE_KEY;
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 // Dummy addresses for testing (replace with real ones for integration)
-const testHospital = "0x0000000000000000000000000000000000000001";
-const testPatient = "0x0000000000000000000000000000000000000002";
+const testHospital = randomEvmAddress();
+const testPatient = randomEvmAddress();
 const testHospitalName = "Test Hospital";
 const testData = "Test Medical Data";
 const testReason = "Test Reason";
