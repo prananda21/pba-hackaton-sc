@@ -76,3 +76,7 @@ NEXT_PUBLIC_CONTRACT_ADDRESS="......"
 3. With access granted, the hospital can retrieve and decrypt the EMR.
 
 ---
+
+## Notes
+
+> Frontend not ready yet!
