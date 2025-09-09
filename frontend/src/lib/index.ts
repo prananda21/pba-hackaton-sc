@@ -14,7 +14,9 @@ export class BlockchainRegistry {
    */
   async setupProvider() {
     // Setup provider connection first
-    this.provider = new JsonRpcProvider("// TODO: add the real rpc url here");
+    const rpcUrl = process.env.RPC_URL;
+    if (!rpcUrl) throw new Error("RPC URL not found in environment variables");
+    this.provider = new JsonRpcProvider(rpcUrl);
 
     try {
       await this.provider.getNetwork();
@@ -35,7 +37,11 @@ export class BlockchainRegistry {
     // TODO: Add the real contract address and ABI below
     const abi = await this.loadAbi();
 
-    const contractAddress = "0x0000000000000000000000000000000000000000"; //! NEED TO CHANGE ASAP
+    // const contractAddress = "0x0000000000000000000000000000000000000000"; //! NEED TO CHANGE ASAP
+    const contractAddress = process.env.CONTRACT_ADDRESS;
+    if (!contractAddress)
+      throw new Error("Contract address not found in environment variables");
+
     this.contract = new Contract(contractAddress, abi, this.wallet);
   }
 
