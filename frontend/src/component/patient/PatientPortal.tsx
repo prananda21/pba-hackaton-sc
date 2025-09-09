@@ -2,13 +2,13 @@ import { useState } from "react";
 
 import { ArrowLeft, Activity, Calendar, Users, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { ConsentManagement } from "./ConsentManagement";
 import { MedicalRecord } from "./MedicalRecord";
 import { PatientHeader } from "./PatientHeader";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 // Mock data
 const mockPatient = {
@@ -184,8 +184,8 @@ export default function PatientPortal() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="records" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="records" className="space-y-6 flex space-x-6 gap-3">
+          <TabsList className="grid w-full grid-cols-2 gap-2.5">
             <TabsTrigger value="records">Medical Records</TabsTrigger>
             <TabsTrigger value="consent">Consent Management</TabsTrigger>
           </TabsList>

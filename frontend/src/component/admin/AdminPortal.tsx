@@ -10,7 +10,6 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -19,6 +18,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
+import Link from "next/link";
 
 // Mock data
 const mockHospitals = [
@@ -58,7 +58,6 @@ const mockHospitals = [
 ];
 
 export default function AdminPortal() {
-  const navigate = useNavigate();
   const [hospitals, setHospitals] = useState(mockHospitals);
   const [newHospital, setNewHospital] = useState({
     name: "",
@@ -171,10 +170,10 @@ export default function AdminPortal() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+            <Link href="/">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Role Selection
-            </Button>
+            </Link>
             <h1 className="text-3xl font-bold text-foreground">
               System Administration
             </h1>
