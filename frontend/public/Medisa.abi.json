@@ -6,30 +6,46 @@
   },
   {
     "type": "function",
-    "name": "accessRequests",
+    "name": "approveConsent",
     "inputs": [
       {
-        "name": "",
+        "name": "_hospital",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "denyConsent",
+    "inputs": [
+      {
+        "name": "_hospital",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getConsentRequest",
+    "inputs": [
+      {
+        "name": "_hospital",
         "type": "address",
         "internalType": "address"
       },
       {
-        "name": "",
+        "name": "_patient",
         "type": "address",
         "internalType": "address"
       }
     ],
     "outputs": [
-      {
-        "name": "hospital",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "patient",
-        "type": "address",
-        "internalType": "address"
-      },
       {
         "name": "reason",
         "type": "string",
@@ -44,73 +60,14 @@
         "name": "exists",
         "type": "bool",
         "internalType": "bool"
-      },
-      {
-        "name": "timestamp",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "approveAccess",
+    "name": "getMyConsentRequest",
     "inputs": [
-      {
-        "name": "_hospital",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "createRecord",
-    "inputs": [
-      {
-        "name": "_data",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "_patient",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_hospital",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "denyAccess",
-    "inputs": [
-      {
-        "name": "_hospital",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "getAccessRequest",
-    "inputs": [
-      {
-        "name": "_hospital",
-        "type": "address",
-        "internalType": "address"
-      },
       {
         "name": "_patient",
         "type": "address",
@@ -119,19 +76,94 @@
     ],
     "outputs": [
       {
-        "name": "reason",
-        "type": "string",
-        "internalType": "string"
-      },
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct Medisa.ConsentRequest",
+        "components": [
+          {
+            "name": "hospital",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "patient",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "approved",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "exists",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPatientConsentRequests",
+    "inputs": [],
+    "outputs": [
       {
-        "name": "approved",
-        "type": "bool",
-        "internalType": "bool"
-      },
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPatientRecords",
+    "inputs": [],
+    "outputs": [
       {
-        "name": "exists",
-        "type": "bool",
-        "internalType": "bool"
+        "name": "",
+        "type": "tuple[]",
+        "internalType": "struct Medisa.MedicalRecord[]",
+        "components": [
+          {
+            "name": "patient",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "data",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "hospital",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "hospitalName",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
       }
     ],
     "stateMutability": "view"
@@ -176,6 +208,24 @@
   },
   {
     "type": "function",
+    "name": "issueRecord",
+    "inputs": [
+      {
+        "name": "_data",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_patient",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "owner",
     "inputs": [],
     "outputs": [
@@ -183,50 +233,6 @@
         "name": "",
         "type": "address",
         "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "patientRecords",
-    "inputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "patient",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "data",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "hospital",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "hospitalName",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "timestamp",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -251,7 +257,7 @@
   },
   {
     "type": "function",
-    "name": "requestAccess",
+    "name": "requestConsent",
     "inputs": [
       {
         "name": "_patient",
@@ -259,14 +265,22 @@
         "internalType": "address"
       },
       {
-        "name": "_hospital",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "_reason",
         "type": "string",
         "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeConsent",
+    "inputs": [
+      {
+        "name": "_hospital",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [],
@@ -320,7 +334,7 @@
   },
   {
     "type": "event",
-    "name": "AccessApproved",
+    "name": "ConsentApproved",
     "inputs": [
       {
         "name": "hospital",
@@ -339,7 +353,7 @@
   },
   {
     "type": "event",
-    "name": "AccessDenied",
+    "name": "ConsentDenied",
     "inputs": [
       {
         "name": "hospital",
@@ -358,7 +372,7 @@
   },
   {
     "type": "event",
-    "name": "AccessRequested",
+    "name": "ConsentRequested",
     "inputs": [
       {
         "name": "hospital",
