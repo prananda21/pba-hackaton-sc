@@ -54,13 +54,17 @@ export class BlockchainRegistry {
   }
 
   // =================== Core Function ===================
+  // Group of Admin Functions
+  admin = {
+    register: this.register.bind(this),
+  };
   // Group of Hospital Functions
   hospital = {
-    register: this.register.bind(this),
     recordCreation: this.createRecord.bind(this),
     requestAccess: this.requestAccess.bind(this),
     viewRecords: this.viewRecords.bind(this),
   };
+  // Group of Patient Functions
   patient = {
     response: {
       approve: this.approveAccess.bind(this),
